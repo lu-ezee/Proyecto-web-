@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lox | Dentro de mi mente</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto:wght@300&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            background: black;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .sol {
+            position: fixed;
+            top: 50px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #fff, #ffcc00);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 2;
+            transition: opacity 2s;
+        }
+
+        .trueno {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            z-index: 3;
+        }
+
+        .trueno.activo {
+            animation: flash 0.3s;
+        }
+
+        @keyframes flash {
+            0% {opacity: 0;}
+            50% {opacity: 1;}
+            100% {opacity: 0;}
+        }
+
+        .portada {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 4;
+        }
+
+        .portada button {
+            padding: 15px 30px;
+            background: rgba(100,100,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            padding: 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Playfair Display';
+        }
+
+        .categoria {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .categoria h2 {
+            color: #9faaff;
+        }
+
+        .temas button {
+            margin: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .temas button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(100,100,255,0.6);
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="lluvia"></canvas>
+<div class="trueno" id="trueno"></div>
+<div class="sol" id="sol"></div>
+
+<div class="portada">
+    <h1>Lox</h1>
+    <p>Entrá a lo que no puedo explicar… pero sí sentir</p>
+    <button onclick="entrar()">Entrar a mi mundo</button>
+</div>
+
+<div class="overlay" id="contenido">
+
+    <h1>Mis temas</h1>
+
+    <!-- LLUVIA / TRISTE -->
+    <div class="categoria">
+        <h2>🌧️ Lluvia & Truenos</h2>
+        <div class="temas">
+            <button onclick="abrirTema('https://youtu.be/vJhbeY7GvSQ')">Mentiras</button>
+            <button onclick="abrirTema('https://youtu.be/qDxhUfGue_c')">Estorbo</button>
+            <button onclick="abrirTema('https://youtu.be/7lRco7y9YEU')">Noche fría</button>
+            <button onclick="abrirTema('https://youtu.be/JeiwaEnkitM')">No puedo olvidarte</button>
+            <button onclick="abrirTema('https://youtu.be/9s1HM3hczRI')">No puedo olvidarte parte 2</button>
+            <button onclick="abrirTema('https://youtu.be/ewNbwgijtS4')">Háblame</button>
+        </div>
+    </div>
+
+    <!-- SOL / ENERGÍA -->
+    <div class="categoria">
+        <h2>☀️ Luz & Energía</h2>
+        <div class="temas">
+            <button onclick="abrirTema('https://youtu.be/V9R-5lC0wS4')">Mi despertar</button>
+            <button onclick="abrirTema('https://youtu.be/uR3etdvlF7w')">Solo por ti</button>
+            <button onclick="abrirTema('https://youtu.be/l80OQonVxOg')">Mujer</button>
+            <button onclick="abrirTema('https://youtu.be/XcIKuIEx86E')">Mujer remasterizado</button>
+            <button onclick="abrirTema('https://youtu.be/g5p6JDJOqT8')">Karma</button>
+            <button onclick="abrirTema('https://youtu.be/i4jr6qUxX9Y')">Si no me crees</button>
+            <button onclick="abrirTema('https://youtu.be/DfpAOw3Odig')">Ven a mi corazón</button>
+            <button onclick="abrirTema('https://youtu.be/MD0tkwUiYVg')">¿And who cares?</button>
+            <button onclick="abrirTema('https://youtu.be/SH10svDghCg')">Find</button>
+            <button onclick="abrirTema('https://youtu.be/01eYbW_fqaI')">Momentos</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("lluvia");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let gotas = [];
+
+for (let i = 0; i < 200; i++) {
+    gotas.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        l: Math.random() * 20,
+        speed: Math.random() * 5
+    });
+}
+
+function dibujarLluvia() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(174,194,224,0.5)";
+
+    for (let g of gotas) {
+        ctx.beginPath();
+        ctx.moveTo(g.x, g.y);
+        ctx.lineTo(g.x, g.y + g.l);
+        ctx.stroke();
+        g.y += g.speed;
+        if (g.y > canvas.height) g.y = -20;
+    }
+}
+
+function animar() {
+    dibujarLluvia();
+    requestAnimationFrame(animar);
+}
+
+function climaLoop() {
+    let sol = document.getElementById("sol");
+    let trueno = document.getElementById("trueno");
+
+    setTimeout(() => {
+        trueno.classList.add("activo");
+        setTimeout(() => trueno.classList.remove("activo"), 300);
+    }, 3000);
+
+    setTimeout(() => {
+        sol.style.opacity = 1;
+    }, 6000);
+
+    setTimeout(() => {
+        sol.style.opacity = 0;
+        climaLoop();
+    }, 10000);
+}
+
+animar();
+climaLoop();
+
+function entrar() {
+    document.querySelector(".portada").style.display = "none";
+    document.getElementById("contenido").style.display = "block";
+}
+
+function abrirTema(url) {
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
